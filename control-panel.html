@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCH Player</title>
+    <link rel="stylesheet" href="line-awesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #212121;
+            color: #b7b7b7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Rueda dentada flotante en esquina superior derecha */
+        #config-btn {
+            position: fixed;
+            top: 65px;
+            right: 15px;
+            z-index: 1000;
+            cursor: pointer;
+            user-select: none;
+            font-size: 24px;
+            color: #b7b7b7;
+            transition: color 0.3s ease, transform 0.2s ease;
+            background: rgba(23, 23, 23, 0.8);
+            padding: 10px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #config-btn:hover {
+            color: #dc3545;
+            transform: rotate(90deg);
+            background: rgba(23, 23, 23, 0.95);
+        }
+
+        #config-btn i {
+            margin: 0;
+        }
+
+        .download-status-container {
+            position: fixed;
+            top: 120px;
+            right: 15px;
+            z-index: 999;
+            max-width: 300px;
+        }
+
+        .control-section {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            background: #171717;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .control-group.playback-mode {
+            background: #303030;
+        }
+
+        .control-group h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #b7b7b7;
+        }
+
+        .control-group h4 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #b7b7b7;
+        }
+
+        .control-group h5 {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #b7b7b7;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #171717;
+            border: none;
+            color: #b7b7b7;
+            padding: 15px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2a2a2a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #171717;
+            color: #b7b7b7;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #ffffff;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #171717;
+            color: #b7b7b7;
+        }
+
+        .btn-warning {
+            background: #171717;
+            color: #b7b7b7;
+        }
+
+        .btn-info {
+            background: #171717;
+            color: #b7b7b7;
+        }
+
+        .btn-secondary {
+            background: #171717;
+            color: #b7b7b7;
+        }
+
+        .btn:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        /* Animación de spinner para iconos de carga */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .la-spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        .btn.disabled {
+            background: #555 !important;
+            color: #999 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* Toast simple en esquina inferior derecha */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #323232;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 2000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #toast.toast-success {
+            background: #2e7d32; /* verde */
+        }
+
+        #toast.toast-error {
+            background: #c62828; /* rojo */
+        }
+
+        .download-in-progress .btn {
+            background: #555 !important;
+            color: #999 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* Estilos para elementos específicos */
+        span {
+            color: #b7b7b7;
+        }
+
+        p {
+            color: #b7b7b7;
+        }
+
+        div {
+            color: #b7b7b7;
+        }
+
+        /* Estilos para iconos LineAwesome */
+        .las, .lar, .lab {
+            color: #b7b7b7;
+            font-size: 16px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Layout de dos columnas cuando está maximizada */
+        body.maximized .control-section {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            height: calc(100vh - 150px);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        body.maximized #playback-mode-section {
+            flex: 0 0 50%;
+            width: 50%;
+            height: auto;
+            max-height: 100%;
+            overflow-y: auto;
+            align-self: flex-start;
+        }
+
+        body.maximized #audio-list-section {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 0;
+        }
+
+        body.maximized #config-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            background: #212121;
+            overflow-y: auto;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Rueda dentada flotante -->
+    <span id="config-btn"><i class="las la-cog"></i></span>
+
+    <!-- Estado de descarga flotante -->
+    <div class="download-status-container">
+        <div id="download-status" style="display: none; padding: 10px; background: #2d5a87; border-radius: 5px; color: #ffffff; font-weight: bold;">
+            <i class="las la-download"></i> Descargando contenido nuevo...
+        </div>
+    </div>
+
+    <!-- Logo -->
+    <div style="text-align: center; margin: 10px 0 5px 0; padding: 0 20px;">
+        <img src="assets/logo.png" alt="Logo" style="max-width: 100%; height: auto; max-height: 120px;">
+    </div>
+
+    <div class="control-section">
+
+        <!-- Panel de Configuración (oculto por defecto) -->
+        <div id="config-panel" class="control-group" style="display: none;">
+
+            <!-- Control de Videos -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">Control de Videos</h4>
+                <div class="control-buttons">
+                    <button id="load-security-video-btn" class="btn btn-warning">Cargar Video Seguridad</button>
+                    <button id="load-loop-video-btn" class="btn btn-info">Cargar Video Loop</button>
+                    <button id="load-loop-embarque-video-btn" class="btn btn-info">Cargar Video Loop Embarque</button>
+                    <button id="load-audio-video-btn" class="btn btn-info">Cargar Placa Audio</button>
+                    <button id="clear-videos-btn" class="btn btn-danger">Borrar Todos los Videos</button>
+                </div>
+            </div>
+
+            <!-- Control de Audios -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">Control de Audios</h4>
+                <div class="control-buttons">
+                    <button id="load-audio-btn" class="btn btn-primary">Cargar Audio</button>
+                    <button id="clear-audios-btn" class="btn btn-danger">Borrar Todos los Audios</button>
+                </div>
+                <div id="config-audio-list" style="margin-top: 10px;">
+                    <!-- Lista de audios en configuración -->
+                </div>
+            </div>
+
+            <!-- Control de Música -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">Control de Música</h4>
+                <div class="control-buttons">
+                    <button id="load-music-btn" class="btn btn-primary">Cargar Música</button>
+                    <button id="clear-music-btn" class="btn btn-danger">Borrar Toda la Música</button>
+                </div>
+                <div id="config-music-list" style="margin-top: 10px;">
+                    <!-- Lista de música en configuración -->
+                </div>
+            </div>
+
+            <!-- Control de Cámara IP -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">
+                    Control de Cámara IP 
+                    <span id="camera-status-indicator" style="margin-left: 10px; font-size: 12px; color: #888;">●</span>
+                </h4>
+                <div class="control-buttons">
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <input type="text" id="ip-camera-url" placeholder="http://192.168.0.4:8080/video" style="width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #b7b7b7; box-sizing: border-box;">
+                        <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                            <p>URLs comunes para cámaras IP:</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>http://192.168.0.4:8080/video (MJPEG)</li>
+                            </ul>
+                            <p style="margin-top: 10px; color: #666; font-size: 11px;">
+                                💡 Para mejorar la calidad, usa los controles que aparecen al probar el stream MJPEG
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="test-camera-btn" class="btn btn-success" style="flex: 1;"><i class="las la-video"></i> Probar Cámara</button>
+                            <button id="save-camera-btn" class="btn btn-primary" style="flex: 1;"><i class="las la-save"></i> Guardar URL</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Importar Proyecto Manualmente -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">Importar Proyecto</h4>
+                <div class="control-buttons">
+                    <button id="import-project-btn" class="btn btn-primary"><i class="las la-file-archive"></i> Importar Proyecto Manualmente</button>
+                </div>
+            </div>
+
+            <!-- Configuración del Manager (Simplificada) -->
+            <div class="control-group" style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-bottom: 12px;">
+                    Configuración del Manager 
+                    <span id="manager-status-indicator" style="margin-left: 10px; font-size: 12px; color: #888;">●</span>
+                </h4>
+                <div class="control-buttons">
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <div>
+                            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 5px;">Hostname/IP del Manager:</label>
+                            <input type="text" id="manager-hostname" placeholder="manager.midominio.DynAlias.org o 192.168.1.100" style="width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #b7b7b7; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #888; display: block; margin-bottom: 5px;">Terminal ID:</label>
+                            <input type="text" id="manager-terminal-id" placeholder="terminal_001" style="width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #b7b7b7; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 5px; font-size: 11px; color: #666;">
+                            <p><strong>Puerto:</strong> 9001 (fijo)</p>
+                            <p><strong>Rutas:</strong> Todas fijas (programacion/, programacion/videos/, etc.)</p>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                            <p>Configuración de conexión al Manager:</p>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Hostname/IP: DynAlias (ej: manager.midominio.DynAlias.org) o IP directa (ej: 192.168.1.100)</li>
+                                <li>Terminal ID: Identificador único de este terminal (configurado manualmente)</li>
+                            </ul>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="save-manager-config-btn" class="btn btn-primary" style="flex: 1;"><i class="las la-save"></i> Guardar Configuración</button>
+                            <button id="test-manager-btn" class="btn" style="flex: 1; background: #6c757d;"><i class="las la-check"></i> Probar Conexión</button>
+                        </div>
+                        <div id="manager-info" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; font-size: 12px; color: #888;">
+                            <p><strong>Estado:</strong> <span id="manager-status">Desconocido</span></p>
+                            <p><strong>URL del Manager:</strong> <span id="manager-url">No configurado</span></p>
+                            <p><strong>Terminal ID:</strong> <span id="manager-terminal-id-display">No configurado</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modo de Reproducción -->
+        <div id="playback-mode-section" class="control-group playback-mode">
+            <h3>Modo de Reproducción</h3>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <button id="mode-loop-btn" class="btn btn-info" style="width: 300px;">Loop Bienvenida</button>
+                <div id="loop-embarque-container" style="width: 300px; display: none;">
+                    <button id="mode-loop-embarque-btn" class="btn btn-info" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>Loop Embarque</span>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; margin: 0; pointer-events: auto;" onclick="event.stopPropagation();">
+                            <i class="las la-music" style="color: #fff; font-size: 16px;"></i>
+                            <input type="checkbox" id="enable-music-toggle" style="width: 16px; height: 16px; cursor: pointer; margin: 0; pointer-events: auto; flex-shrink: 0;" onclick="event.stopPropagation();">
+                        </label>
+                    </button>
+                </div>
+                <button id="mode-security-btn" class="btn btn-warning" style="width: 300px;">Inicio del Viaje <span style="font-size: 11px;">(Seguridad + Publicidad)</span></button>
+                <button id="mode-project-btn" class="btn btn-success" style="width: 300px;">Tanda de Publicidad</button>
+                <button id="mode-certificacion-btn" class="btn" style="width: 300px;">Certificación</button>
+                <button id="mode-off-btn" class="btn" style="width: 300px;">Apagar</button>
+            </div>
+            <div style="text-align: center; margin-top: 10px; font-size: 12px; opacity: 0.7;">
+                <span id="current-mode"></span>
+            </div>
+        </div>
+            
+        <!-- Modal para nombre de audio (mismo estilo que contraseña) -->
+        <div id="audio-name-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+            <div style="background: #212121; padding: 30px; border-radius: 10px; color: #b7b7b7; min-width: 350px; max-width: 90vw; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <h3 style="margin: 0 0 20px 0; color: #b7b7b7; text-align: center;"><i class="las la-music"></i> Nombre del Audio</h3>
+                <input type="text" id="audio-name-input" placeholder="Ingresa un nombre para este audio" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #b7b7b7; box-sizing: border-box; font-size: 14px;">
+                <div style="text-align: right; margin-top: 20px;">
+                    <button id="cancel-audio-name" class="btn" style="margin-right: 10px; background: #6c757d; color: white;"><i class="las la-times"></i> Cancelar</button>
+                    <button id="confirm-audio-name" class="btn btn-primary"><i class="las la-check"></i> Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para contraseña de configuración -->
+        <div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10002; align-items: center; justify-content: center;">
+            <div style="background: #212121; padding: 30px; border-radius: 10px; color: #b7b7b7; min-width: 350px; max-width: 90vw; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <h3 style="margin: 0 0 20px 0; color: #b7b7b7; text-align: center;"><i class="las la-lock"></i> Acceso a Configuración</h3>
+                <p style="margin-bottom: 15px; color: #888; font-size: 14px; text-align: center;">Ingrese la contraseña para acceder a las opciones de configuración</p>
+                <input type="password" id="password-input" placeholder="Ingrese la contraseña" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #b7b7b7; box-sizing: border-box; font-size: 14px;">
+                <div id="password-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: 5px; text-align: center;">Contraseña incorrecta. Intente nuevamente.</div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button id="cancel-password" class="btn" style="margin-right: 10px; background: #6c757d; color: white;"><i class="las la-times"></i> Cancelar</button>
+                    <button id="confirm-password" class="btn btn-primary"><i class="las la-check"></i> Ingresar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para probar cámara IP -->
+        <div id="camera-test-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; align-items: center; justify-content: center; overflow-y: auto;">
+            <div style="background: #212121; padding: 12px; border-radius: 8px; color: #b7b7b7; width: 95%; max-width: 380px; margin: 10px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <h3 style="margin: 0 0 8px 0; color: #b7b7b7; text-align: center; font-size: 14px;"><i class="las la-video"></i> Prueba de Cámara IP</h3>
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <span id="camera-url-display" style="color: #888; font-size: 10px; word-break: break-all; display: block;"></span>
+                </div>
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <video id="camera-test-video" style="max-width: 100%; max-height: 180px; border: 2px solid #444; border-radius: 5px; display: none;" autoplay muted></video>
+                    <img id="camera-test-image" style="max-width: 100%; max-height: 180px; border: 2px solid #444; border-radius: 5px; display: none;">
+                </div>
+                <div id="quality-controls" style="display: none; margin-bottom: 8px; padding: 6px; background: rgba(255,255,255,0.05); border-radius: 5px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
+                            <label style="font-size: 10px; color: #888;">Calidad:</label>
+                            <select id="quality-select" style="padding: 3px; border: 1px solid #444; border-radius: 3px; background: #2a2a2a; color: #b7b7b7; font-size: 10px; flex: 1; max-width: 140px;">
+                                <option value="low">Baja (25%)</option>
+                                <option value="medium" selected>Media (50%)</option>
+                                <option value="high">Alta (75%)</option>
+                                <option value="max">Máxima (100%)</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 5px;">
+                            <label style="font-size: 10px; color: #888;">Resolución:</label>
+                            <select id="resolution-select" style="padding: 3px; border: 1px solid #444; border-radius: 3px; background: #2a2a2a; color: #b7b7b7; font-size: 10px; flex: 1; max-width: 140px;">
+                                <option value="320x240">320x240</option>
+                                <option value="640x480" selected>640x480</option>
+                                <option value="800x600">800x600</option>
+                                <option value="1024x768">1024x768</option>
+                                <option value="1280x720">1280x720</option>
+                                <option value="1920x1080">1920x1080</option>
+                            </select>
+                        </div>
+                        <button id="apply-quality-btn" class="btn" style="background: #28a745; font-size: 11px; padding: 5px 10px; width: 100%; cursor: pointer; pointer-events: auto; z-index: 10002;"><i class="las la-check"></i> Aplicar</button>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <span id="camera-status" style="color: #888; font-size: 11px;">Conectando...</span>
+                </div>
+                <div style="text-align: center;">
+                    <button id="close-camera-test" class="btn btn-primary" style="cursor: pointer; pointer-events: auto; z-index: 10002; padding: 6px 12px; font-size: 11px;"><i class="las la-times"></i> Cerrar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="audio-list-section" style="margin-top: 10px;">
+            <h3>Reproducir Avisos</h3>
+            <div id="audio-list">
+                <!-- Lista de audios cargados -->
+            </div>
+        </div>
+
+        <!-- Modal de Certificación -->
+        <div id="certificacion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; align-items: center; justify-content: center; overflow-y: auto;">
+            <div style="background: #212121; padding: 20px; border-radius: 8px; color: #b7b7b7; width: 95%; max-width: 600px; margin: 20px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin: 0 0 15px 0; color: #b7b7b7; text-align: center; font-size: 18px;">Certificación</h3>
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <button id="play-certificacion-btn" class="btn btn-success" style="width: 200px;">
+                        <i class="las la-play"></i> Reproducir
+                    </button>
+                </div>
+                <div id="certificacion-videos-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #444; border-radius: 5px; padding: 10px; background: rgba(255,255,255,0.05);">
+                    <p style="text-align: center; color: #888; margin: 20px 0;">Cargando videos...</p>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button id="close-certificacion-modal" class="btn" style="background: #6c757d; color: white;">
+                        <i class="las la-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="control-panel.js"></script>
+</body>
+</html>

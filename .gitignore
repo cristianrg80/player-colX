@@ -1,0 +1,52 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de compilación
+dist/
+build/
+out/
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+.cache/
+
+# Archivos de usuario (datos de la aplicación)
+cch_player/
+*.db
+*.sqlite
+
+# Archivos de Electron
+*.asar
+*.asar.unpacked
+

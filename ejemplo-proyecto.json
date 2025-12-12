@@ -1,0 +1,94 @@
+{
+  "name": "Proyecto Ejemplo CCH Player",
+  "version": "1.0.0",
+  "blocks": [
+    {
+      "name": "Bloque Horario Laboral",
+      "daysOfWeek": [1, 2, 3, 4, 5],
+      "useTimeRange": true,
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "items": [
+        {
+          "type": "video",
+          "file": "publicidad1.mp4",
+          "name": "Publicidad Principal",
+          "duration": 30,
+          "daysOfWeek": [1, 2, 3, 4, 5],
+          "useTimeRange": true,
+          "startTime": "09:00",
+          "endTime": "12:00"
+        },
+        {
+          "type": "webcam",
+          "url": "http://192.168.0.4:8080/video",
+          "name": "Cámara Principal",
+          "duration": 60,
+          "daysOfWeek": [1, 3, 5],
+          "useTimeRange": true,
+          "startTime": "10:00",
+          "endTime": "11:00"
+        },
+        {
+          "type": "video",
+          "file": "publicidad2.mp4",
+          "name": "Publicidad Secundaria",
+          "duration": 45,
+          "daysOfWeek": [],
+          "useTimeRange": false
+        },
+        {
+          "type": "audio",
+          "file": "alerta.mp3",
+          "name": "Alerta de Seguridad",
+          "duration": 10,
+          "daysOfWeek": [1, 2, 3, 4, 5],
+          "useTimeRange": true,
+          "startTime": "14:00",
+          "endTime": "15:00"
+        }
+      ]
+    },
+    {
+      "name": "Bloque Fin de Semana",
+      "daysOfWeek": [0, 6],
+      "useTimeRange": false,
+      "items": [
+        {
+          "type": "video",
+          "file": "video_finde.mp4",
+          "name": "Video Fin de Semana",
+          "duration": 120,
+          "daysOfWeek": [],
+          "useTimeRange": false
+        },
+        {
+          "type": "webcam",
+          "url": "http://192.168.0.4:8080/video",
+          "name": "Cámara Fin de Semana",
+          "duration": 30,
+          "daysOfWeek": [0, 6],
+          "useTimeRange": true,
+          "startTime": "12:00",
+          "endTime": "14:00"
+        }
+      ]
+    },
+    {
+      "name": "Bloque 24/7",
+      "daysOfWeek": [],
+      "useTimeRange": false,
+      "items": [
+        {
+          "type": "video",
+          "file": "loop_continuo.mp4",
+          "name": "Loop Continuo",
+          "duration": 60,
+          "daysOfWeek": [],
+          "useTimeRange": false
+        }
+      ]
+    }
+  ]
+}
+

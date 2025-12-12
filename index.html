@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player</title>
+    <link href="video-js.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            cursor: none !important;
+        }
+
+        /* Ocultar cursor en todos los elementos */
+        body * {
+            cursor: none !important;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #video-player {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Estilos para doble buffer */
+        #video-player, #video-player-2 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 2;
+        }
+        
+        /* Asegurar que video.js también ocupe el 100% */
+        #video-player .video-js,
+        #video-player-2 .video-js {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        #video-player .vjs-tech,
+        #video-player-2 .vjs-tech,
+        #video-player video,
+        #video-player-2 video {
+            z-index: 2;
+        }
+
+        #video-player-2 {
+            display: none;
+        }
+
+        #video-player-2.show {
+            display: block !important;
+        }
+
+        #video-player-2.show .vjs-tech {
+            display: block !important;
+        }
+
+        #video-player.hide {
+            display: none !important;
+        }
+
+        #video-player.hide .vjs-tech {
+            display: none !important;
+        }
+
+        /* Forzar visibilidad de elementos HTML5 internos */
+        #video-player-2.show video {
+            display: block !important;
+        }
+
+        #video-player.hide video {
+            display: none !important;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            background-color: #000000;
+            background: #000000;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .empty-state .subtitle {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Ocultar controles nativos de video */
+        .video-js .vjs-control-bar {
+            display: none !important;
+        }
+
+        /* Ajuste de videos para diferentes aspect ratios */
+        .video-js .vjs-tech {
+            object-fit: fill !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Videos ocupando 100% del ancho y alto, estirados */
+        .video-js video {
+            object-fit: fill !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="player-container">
+            <!-- Reproductor de video principal -->
+            <video id="video-player" class="video-js vjs-default-skin" preload="auto" data-setup="{}">
+                <p class="vjs-no-js">
+                    Para ver este video, por favor habilita JavaScript y considera actualizar a un 
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">navegador web que soporte HTML5 video</a>.
+                </p>
+            </video>
+
+            <!-- Reproductor de video secundario (doble buffer) -->
+            <video id="video-player-2" class="video-js vjs-default-skin" preload="auto" data-setup="{}" style="display: none;">
+                <p class="vjs-no-js">
+                    Reproductor secundario
+                </p>
+            </video>
+
+
+
+            <!-- Estado vacío -->
+            <div id="empty-state" class="empty-state">
+                <p>Sin contenido</p>
+            </div>
+
+            <!-- Estado de audio -->
+            <div id="audio-state" style="display: none; background: black; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5;">
+            </div>
+
+            <!-- Estado de webcam -->
+            <div id="webcam-state" style="display: none; background: black; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5;">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="video.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
